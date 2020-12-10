@@ -1,4 +1,5 @@
 #include "SymbolInfo.mqh"
+#include "SymbolStrategyResult.mqh"
 
 class SymbolsContainer {
 
@@ -13,8 +14,8 @@ class SymbolsContainer {
       SymbolsContainer(string &symbolsList[]);
       ~SymbolsContainer();
       bool checkInitSuccess();
-      void newBar();
-      SymbolInfo* confirmedStrategy();
+      bool newBar();
+      SymbolStrategy* getConfirmedStrategy();
 };
 
 SymbolsContainer::SymbolsContainer(string &symbolsList[]) {
@@ -77,47 +78,56 @@ bool SymbolsContainer::checkInitSuccess(void) {
    return initSuccess;
 }
 
-void SymbolsContainer::newBar(void) {
+bool SymbolsContainer::newBar(void) {
 
    for (int i = 0; i < symbolsCount; i++) {
    
-      symbolsInfo[i].newBar();
+      if (!symbolsInfo[i].newBar()) return false;
    }
+   
+   return true;
 }
 
-SymbolInfo* SymbolsContainer::confirmedStrategy(void) {
+SymbolStrategy* SymbolsContainer::getConfirmedStrategy(void) {
 
-   /*SymbolInfo* confirmedSymbols[];
-   double confirmedTrendings[];
-
+   SymbolStrategy* symbolStrategyList[];
+   int eulerList[];
+   
    for (int i = 0; i < symbolsCount; i++) {
    
       SymbolInfo* si = symbolsInfo[i];
-      double trending = si.calculateStrategy();
-            
-      if (trending > 0.0) {
+      SymbolStrategy* symbolStrategy = si.getConfirmedStrategy();
       
-         //Estrategia do ativo confirmada, adicionar num array pra ver o melhor papel depois
+      if (symbolStrategy != NULL) {
+      
+         int size = ArraySize(symbolStrategyList);
          
-         int size1 = ArraySize(confirmedSymbols);
-         int size2 = ArraySize(confirmedTrendings);
+         if (ArrayResize(symbolStrategyList, size + 1, 0) == -1) return NULL;
          
-         ArrayResize(confirmedSymbols, size1 + 1, 0);
-         ArrayResize(confirmedTrendings, size2 + 1, 0);
-         
-         confirmedSymbols[size1] = si;
-         confirmedTrendings[size2] = trending;
+         symbolStrategyList[size] = symbolStrategy;
       }
    }
    
-   if (ArraySize(confirmedSymbols) > 0 && ArraySize(confirmedTrendings) > 0) {
+   int strategiesSize = ArraySize(symbolStrategyList);
    
-      int index = ArrayMaximum(confirmedTrendings, 0, WHOLE_ARRAY);
+   if (strategiesSize > 0) {
+   
+      for (int i = 0; i < strategiesSize; i++) {
+         
+         int size = ArraySize(eulerList);
+         
+         if (ArrayResize(eulerList, size + 1, 0) == -1) return NULL;
+         
+         eulerList[size] = symbolStrategyList[i].getEuler();
+      }
       
-      return confirmedSymbols[index];
+      int index = ArrayMaximum(eulerList, 0, WHOLE_ARRAY);
+         
+      if (index != -1) {
+         
+         return symbolStrategyList[index];
+      }
    }
-   
-   return NULL;*/
    
    return NULL;
 }

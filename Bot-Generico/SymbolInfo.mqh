@@ -1,6 +1,7 @@
 #include "SymbolStrategy.mqh"
 #include "SymbolStrategyResult.mqh"
-#include "StrategyLarryWilliams777.mqh"
+#include "StrategyLarryWilliams1.mqh"
+#include "StrategyLarryWilliams2.mqh"
 
 class SymbolInfo {
 
@@ -8,6 +9,7 @@ class SymbolInfo {
    
       string name;
       bool initSuccess;
+      int strategyCount;
       SymbolStrategy* symbolStrategies[];
       SymbolStrategy* currentStrategy;
       bool addStrategy(SymbolStrategy* symbolStrategy);
@@ -19,10 +21,8 @@ class SymbolInfo {
       
       bool checkInitSuccess();
       string getName();
-      void newBar();
-      bool mustAdjustTP();
-      bool mustClosePosition();
-      SymbolStrategyResult* getStrategyResult();
+      bool newBar();
+      SymbolStrategy* getConfirmedStrategy();
 };
 
 SymbolInfo::SymbolInfo(string symbolName) {
@@ -33,11 +33,10 @@ SymbolInfo::SymbolInfo(string symbolName) {
    
    //Adicionar estrategias no simbolo
    
-   //if (!addStrategy(new StrategyLarryWilliams777(name))) return;
-   //if (!addStrategy(new StrategyLarryWilliams777(name))) return;
-   //if (!addStrategy(new StrategyLarryWilliams777(name))) return;
-   //if (!addStrategy(new StrategyLarryWilliams777(name))) return;
-   //if (!addStrategy(new StrategyLarryWilliams777(name))) return;
+   if (!addStrategy(new StrategyLarryWilliams1(name))) return;
+   //if (!addStrategy(new StrategyLarryWilliams2(name))) return;
+   
+   strategyCount = ArraySize(symbolStrategies);
    
    initSuccess = true;
 }
@@ -80,80 +79,27 @@ string SymbolInfo::getName(void) {
    return name;
 }
 
-void SymbolInfo::newBar(void) {
-
-   int strategyCount = ArraySize(symbolStrategies);
+bool SymbolInfo::newBar(void) {
    
    for (int i = 0; i < strategyCount; i++) {
    
-      symbolStrategies[i].newBar();
-   }
-}
-
-bool SymbolInfo::mustAdjustTP(void) {
-
-   return currentStrategy.mustAdjustTP();
-}
-
-bool SymbolInfo::mustClosePosition(void) {
-
-   return currentStrategy.mustClosePosition();
-}
-
-/*bool SymbolInfo::adjustMarketInfo(void) {
-
-   if (!SymbolInfoTick(name, lastTick)) {
-               
-      Alert("Erro ao obter lastTick: ", GetLastError());
-      
-      return false;
-   }
-
-   if (CopyRates(name, PERIOD_D1, 0, 5, rates) < 0) {
-               
-      Print(CLASS_NAME, ", ", name,": Erro ao copiar o MqlRates: ", GetLastError());
-      
-      return false;
-   }
-   
-   if (CopyBuffer(handleMA5Max, 0, 0, 1, arrayMA5Max) < 0      ||
-       CopyBuffer(handleMA2Min, 0, 0, 1, arrayMA2Min) < 0      ||
-       CopyBuffer(handleStochastic, 0, 0, 1, arrayStochastic) < 0) {
-                     
-      Print(CLASS_NAME, ", ", name,": Erro ao copiar indicadores: ", GetLastError());
-      
-      return false;
+      if (!symbolStrategies[i].newBar()) return false;
    }
    
    return true;
-}*/
+}
 
-/*double SymbolInfo::calculateStrategy(void) {
+SymbolStrategy* SymbolInfo::getConfirmedStrategy() {
 
-   if (adjustMarketInfo()) {
+   Print("getConfirmedStrategy()");
+
+   for (int i = 0; i < strategyCount; i++) {
    
-      //Verificar se ultimo preco esta acima da media de 30
-   
-      if (arrayStochastic[0] < 30.0) {
+      if (symbolStrategies[i].mustOpenPosition()) {
       
-         //Verificar se ultimo candle esta fechando abaixo da media minima de 3
-         
-         if (lastTick.last < arrayMA2Min[0]) {
-            
-            return arrayMA2Min[0] - lastTick.last;
-         }  
+         return symbolStrategies[i];
       }
    }
    
-   return 0.0;
-}*/
-
-SymbolStrategyResult* SymbolInfo::getStrategyResult(void) {
-
-   if (currentStrategy != NULL) {
-   
-      return currentStrategy.getStrategyResult();
-   }
-
    return NULL;
 }
