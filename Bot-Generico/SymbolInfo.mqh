@@ -34,7 +34,7 @@ SymbolInfo::SymbolInfo(string symbolName) {
    //Adicionar estrategias no simbolo
    
    if (!addStrategy(new StrategyLarryWilliams1(name))) return;
-   //if (!addStrategy(new StrategyLarryWilliams2(name))) return;
+   if (!addStrategy(new StrategyLarryWilliams2(name))) return;
    
    strategyCount = ArraySize(symbolStrategies);
    

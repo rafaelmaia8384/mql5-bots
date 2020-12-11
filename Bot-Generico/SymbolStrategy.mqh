@@ -8,6 +8,9 @@ class SymbolStrategy {
       bool initSuccess;
       bool updateMarketInfo();
       
+      //int handleMA200;
+      //int handleEMA;
+      
    protected:
    
       string name;

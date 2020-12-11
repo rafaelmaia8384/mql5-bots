@@ -153,6 +153,8 @@ bool StrategyLarryWilliams1::mustAdjustTP(void) {
 
 double StrategyLarryWilliams1::getNewTP(void) {
 
+   //Lembrar de normalizar o preco
+
    return 0.0;
 }
 
