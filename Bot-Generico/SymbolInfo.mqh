@@ -1,7 +1,9 @@
 #include "SymbolStrategy.mqh"
 #include "SymbolStrategyResult.mqh"
-#include "StrategyLarryWilliams1.mqh"
-#include "StrategyLarryWilliams2.mqh"
+#include "StrategyLarryConnorsRSI4.mqh"
+#include "StrategyLarryWilliamsMA3.mqh"
+#include "StrategyBandasDeBollinger.mqh"
+#include "Strategy9H21L.mqh"
 
 class SymbolInfo {
 
@@ -33,8 +35,10 @@ SymbolInfo::SymbolInfo(string symbolName) {
    
    //Adicionar estrategias no simbolo
    
-   if (!addStrategy(new StrategyLarryWilliams1(name))) return;
-   if (!addStrategy(new StrategyLarryWilliams2(name))) return;
+   if (!addStrategy(new StrategyLarryConnorsRSI4(name))) return;
+   if (!addStrategy(new StrategyLarryWilliamsMA3(name))) return;
+   //if (!addStrategy(new StrategyBandasDeBollinger(name))) return;
+   //if (!addStrategy(new Strategy9H21L(name))) return;
    
    strategyCount = ArraySize(symbolStrategies);
    

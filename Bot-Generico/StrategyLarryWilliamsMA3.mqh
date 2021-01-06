@@ -1,7 +1,7 @@
 #include "SymbolStrategy.mqh"
 #include "SymbolStrategyResult.mqh"
 
-class StrategyLarryWilliams2: public SymbolStrategy {
+class StrategyLarryWilliamsMA3: public SymbolStrategy {
 
    private:
    
@@ -22,20 +22,21 @@ class StrategyLarryWilliams2: public SymbolStrategy {
 
    public:
    
-      StrategyLarryWilliams2(string symbolName);
-      ~StrategyLarryWilliams2();
+      StrategyLarryWilliamsMA3(string symbolName);
+      ~StrategyLarryWilliamsMA3();
       
       virtual bool checkInitSuccess();
       virtual string getStrategyName();
       virtual bool newBar();
       virtual bool mustOpenPosition();
       virtual bool mustClosePosition();
+      virtual bool mustClosePositionOnAdjust();
       virtual bool mustAdjustTP();
       virtual double getNewTP();
       virtual SymbolStrategyResult* getStrategyResult();
 };
 
-StrategyLarryWilliams2::StrategyLarryWilliams2(string symbolName) : SymbolStrategy(symbolName) {
+StrategyLarryWilliamsMA3::StrategyLarryWilliamsMA3(string symbolName) : SymbolStrategy(symbolName) {
 
    initSuccess = false;
 
@@ -64,23 +65,23 @@ StrategyLarryWilliams2::StrategyLarryWilliams2(string symbolName) : SymbolStrate
    initSuccess = true;
 }
 
-StrategyLarryWilliams2::~StrategyLarryWilliams2() {
+StrategyLarryWilliamsMA3::~StrategyLarryWilliamsMA3() {
 
 }
 
-bool StrategyLarryWilliams2::checkInitSuccess(void) {
+bool StrategyLarryWilliamsMA3::checkInitSuccess(void) {
 
    if (!SymbolStrategy::checkInitSuccess()) return false;
    
    return initSuccess;
 }
 
-string StrategyLarryWilliams2::getStrategyName(void) {
+string StrategyLarryWilliamsMA3::getStrategyName(void) {
 
-   return "ESTRATEGIA LARRY WILLIAMS 2";
+   return "ESTRATEGIA LARRY WILLIAMS MA3";
 }
 
-bool StrategyLarryWilliams2::newBar(void) {
+bool StrategyLarryWilliamsMA3::newBar(void) {
 
    Print("newBar()");
 
@@ -92,7 +93,7 @@ bool StrategyLarryWilliams2::newBar(void) {
    return true;
 }
 
-bool StrategyLarryWilliams2::updateMarketInfo(void) {
+bool StrategyLarryWilliamsMA3::updateMarketInfo(void) {
    
    if (CopyBuffer(handleMA3Max, 0, 0, 1, arrayMA3Max) < 0      ||
        CopyBuffer(handleMA3Min, 0, 0, 1, arrayMA3Min) < 0      ||
@@ -106,7 +107,7 @@ bool StrategyLarryWilliams2::updateMarketInfo(void) {
    return true;
 }
 
-bool StrategyLarryWilliams2::mustOpenPosition(void) {
+bool StrategyLarryWilliamsMA3::mustOpenPosition(void) {
 
    Print("mustOpenPosition()");
    
@@ -121,28 +122,36 @@ bool StrategyLarryWilliams2::mustOpenPosition(void) {
    return false;
 }
 
-bool StrategyLarryWilliams2::mustClosePosition(void) {
+bool StrategyLarryWilliamsMA3::mustClosePosition(void) {
 
    Print("mustClosePosition()");
 
    return lastTick.last > arrayMA3Max[0];
 }
 
-bool StrategyLarryWilliams2::mustAdjustTP(void) {
+bool StrategyLarryWilliamsMA3::mustClosePositionOnAdjust(void) {
 
-   Print("mustAdjustTP()");
+   return false;
+}
+
+bool StrategyLarryWilliamsMA3::mustAdjustTP(void) {
+
+   if (!SymbolStrategy::mustAdjustTP()) return false;
+   if (!updateMarketInfo()) return false;
+   
+   //Retornar verdadeiro caso queira ajusar o Take Profit
    
    return false;
 }
 
-double StrategyLarryWilliams2::getNewTP(void) {
+double StrategyLarryWilliamsMA3::getNewTP(void) {
 
    //Lembrar de normalizar o preco
 
    return 0.0;
 }
 
-SymbolStrategyResult* StrategyLarryWilliams2::getStrategyResult(void) {
+SymbolStrategyResult* StrategyLarryWilliamsMA3::getStrategyResult(void) {
 
    Print("getStrategyResult()");
    

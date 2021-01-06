@@ -1,6 +1,9 @@
 //#include "CandleSignals.mqh"
 #include "SymbolStrategyResult.mqh"
 
+#define RATES_MAX 3
+#define HOST_BACKEND_PATTERN "http://127.0.0.1/pattern-candles"
+
 class SymbolStrategy {
 
    private:
@@ -30,6 +33,7 @@ class SymbolStrategy {
       virtual bool newBar();
       virtual bool mustOpenPosition();
       virtual bool mustClosePosition();
+      virtual bool mustClosePositionOnAdjust();
       virtual bool mustAdjustTP();
       virtual double getNewTP();
       virtual SymbolStrategyResult* getStrategyResult();
@@ -73,7 +77,7 @@ bool SymbolStrategy::updateMarketInfo(void) {
       return false;
    }
 
-   if (CopyRates(name, PERIOD_D1, 0, 5, rates) < 0) {
+   if (CopyRates(name, PERIOD_D1, 0, RATES_MAX, rates) < 0) {
                
       Print("Erro ao copiar o MqlRates: ", GetLastError());
       
@@ -100,9 +104,14 @@ bool SymbolStrategy::mustClosePosition(void) {
    return false;
 }
 
-bool SymbolStrategy::mustAdjustTP(void) {
+bool SymbolStrategy::mustClosePositionOnAdjust(void) {
 
    return false;
+}
+
+bool SymbolStrategy::mustAdjustTP(void) {
+
+   return updateMarketInfo();
 }
 
 double SymbolStrategy::getNewTP(void) {
@@ -111,6 +120,39 @@ double SymbolStrategy::getNewTP(void) {
 }
 
 int SymbolStrategy::getEuler(void) {
+
+   if (MQLInfoInteger(MQL_TESTER)) return 0;
+   
+   string resHeaders;
+   char data[];
+   char result[];
+   string url = HOST_BACKEND_PATTERN;
+   
+   string body = "[";
+   
+   for (int i = 0; i < RATES_MAX; i++) {
+   
+      body += i > 0 ? ",{": "{";
+      body += "\"open\": " + DoubleToString(rates[i].open, 8) + ",";
+      body += "\"high\": " + DoubleToString(rates[i].high, 8) + ",";
+      body += "\"low\": " + DoubleToString(rates[i].low, 8) + ",";
+      body += "\"close\": " + DoubleToString(rates[i].close, 8);
+      body += "}";
+   }
+   
+   body += "]";
+   
+   if (StringToCharArray(body, data, 0, WHOLE_ARRAY, CP_UTF8) > 0) {
+   
+      int res = WebRequest("POST", url, "Content-Type: application/json\r\n", 1000, data, result, resHeaders);
+      
+      if (res == 200) {
+      
+         string euler = CharArrayToString(result, 0, WHOLE_ARRAY, CP_UTF8);
+         
+         return (int)StringToInteger(euler);
+      }
+   }
 
    return 0;
 }
